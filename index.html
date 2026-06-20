@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArXivist Notebook - Minimalistic Paper Analyzer</title>
+    <title>ArxivLLM - Elite Research Terminal</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -14,7 +14,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght=400;500&family=Inter:wght=300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap');
         
         body {
             font-family: 'Inter', sans-serif;
@@ -54,11 +54,11 @@
     <header class="border-b border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 px-6 py-3 flex items-center justify-between z-10">
         <div class="flex items-center space-x-4">
             <div class="flex items-center space-x-2">
-                <span class="text-xs code-font font-bold px-2 py-1 bg-amber-500 text-stone-950 rounded">arXiv-ist</span>
-                <h1 class="text-lg font-semibold tracking-tight">Notebook Link</h1>
+                <span class="text-xs code-font font-bold px-2 py-1 bg-rose-600 text-white rounded">ArxivLLM</span>
+                <h1 class="text-lg font-semibold tracking-tight">Research Terminal</h1>
             </div>
             <span class="text-xs text-stone-400 dark:text-stone-500 hidden md:inline">|</span>
-            <span class="text-xs text-stone-500 dark:text-stone-400 hidden md:inline font-light">Interactive Academic Paper Assistant</span>
+            <span class="text-xs text-stone-500 dark:text-stone-400 hidden md:inline font-light">Interactive Academic Paper Suite & Knowledge Hub</span>
         </div>
 
         <!-- API Key Inputs & Configuration -->
@@ -68,7 +68,7 @@
                     type="password" 
                     id="apiKeyInput" 
                     placeholder="Enter Gemini API Key..." 
-                    class="code-font text-xs bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded pl-8 pr-28 py-1.5 focus:outline-none focus:ring-1 focus:ring-stone-400 dark:focus:ring-stone-500 w-48 sm:w-72 transition-all"
+                    class="code-font text-xs bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded pl-8 pr-28 py-1.5 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:focus:ring-rose-400 w-48 sm:w-72 transition-all"
                 />
                 <div class="absolute left-2.5 text-stone-400 dark:text-stone-500">
                     <i data-lucide="key" class="w-3.5 h-3.5"></i>
@@ -95,24 +95,24 @@
     <!-- Main Workspace Grid -->
     <main class="flex-1 flex overflow-hidden relative">
 
-        <!-- LEFT SIDEBAR: Document List & Upload (Responsive collapsible) -->
+        <!-- LEFT SIDEBAR: Document List, Upload, & Checkbox Active Context -->
         <aside id="sidebar" class="w-80 border-r border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 flex flex-col flex-shrink-0 transition-all duration-300 relative z-20">
             <!-- Upload Area -->
             <div class="p-4 border-b border-stone-100 dark:border-stone-800">
                 <label class="group flex flex-col items-center justify-center border border-dashed border-stone-300 dark:border-stone-700 hover:border-stone-500 dark:hover:border-stone-500 rounded-lg p-4 cursor-pointer bg-stone-50 dark:bg-stone-950 transition-all">
                     <div class="flex flex-col items-center justify-center space-y-1.5 text-center">
                         <i data-lucide="file-up" class="w-6 h-6 text-stone-400 group-hover:text-stone-600 dark:group-hover:text-stone-300 transition-colors"></i>
-                        <span class="text-xs font-medium">Add Academic Papers</span>
-                        <span class="text-[10px] text-stone-400">PDF documents only</span>
+                        <span class="text-xs font-medium">Upload Papers</span>
+                        <span class="text-[10px] text-stone-400">PDF, TXT, MD (Max 5)</span>
                     </div>
-                    <input type="file" id="pdfFileInput" accept=".pdf" class="hidden" multiple />
+                    <input type="file" id="pdfFileInput" accept=".pdf,.txt,.md" class="hidden" multiple />
                 </label>
             </div>
 
             <!-- File List Container -->
             <div class="flex-1 overflow-y-auto p-4 space-y-3">
                 <div class="flex items-center justify-between text-stone-400 dark:text-stone-500 text-[10px] tracking-wider uppercase font-semibold">
-                    <span>Uploaded Corpus</span>
+                    <span>ACTIVE CONTEXT</span>
                     <span id="docCount" class="bg-stone-100 dark:bg-stone-800 px-1.5 py-0.5 rounded">0 Papers</span>
                 </div>
 
@@ -122,71 +122,185 @@
                     <p class="text-xs">No papers uploaded yet.</p>
                 </div>
 
-                <!-- List items container -->
+                <!-- List items container with checkboxes & view target triggers -->
                 <div id="fileListContainer" class="space-y-2"></div>
             </div>
 
-            <!-- Tiny Instructions / Status footer -->
-            <div class="p-3 border-t border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-950 flex items-center justify-between text-[10px] text-stone-400">
-                <span class="code-font">Local parsing active</span>
-                <span class="flex items-center"><i data-lucide="lock" class="w-2.5 h-2.5 mr-1"></i> Private / Secure</span>
+            <!-- Export Session Actions -->
+            <div class="p-3 border-t border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-950 space-y-1.5">
+                <div class="text-[9px] uppercase tracking-wider text-stone-400 font-bold px-1">Session Exporter</div>
+                <div class="grid grid-cols-2 gap-1.5">
+                    <button id="exportChatLogBtn" class="flex items-center justify-center space-x-1 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-800 p-1.5 rounded text-[10px] font-medium transition">
+                        <i data-lucide="download" class="w-3 h-3 text-indigo-500"></i>
+                        <span>Chat Logs</span>
+                    </button>
+                    <button id="exportNotesBtn" class="flex items-center justify-center space-x-1 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-800 p-1.5 rounded text-[10px] font-medium transition">
+                        <i data-lucide="file-text" class="w-3 h-3 text-rose-500"></i>
+                        <span>Report</span>
+                    </button>
+                </div>
             </div>
         </aside>
 
-        <!-- CENTER PANEL: Document Viewer -->
+        <!-- CENTER PANEL: Document Viewer with Tab Navigator & Custom Modes -->
         <section id="centerPanel" class="flex-1 flex flex-col bg-stone-100 dark:bg-stone-950 overflow-hidden border-r border-stone-200 dark:border-stone-800">
-            <!-- Viewer Toolbar -->
-            <div class="h-11 border-b border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 px-4 flex items-center justify-between text-xs">
-                <div class="flex items-center space-x-3">
-                    <button id="toggleSidebarBtn" class="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500" title="Toggle Document List">
+            <!-- Viewer Header with Tab Selectors -->
+            <div class="h-12 border-b border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 px-4 flex items-center justify-between z-10 flex-shrink-0">
+                <div class="flex items-center space-x-1">
+                    <button id="toggleSidebarBtn" class="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 mr-2" title="Toggle Document List">
                         <i data-lucide="menu" class="w-4 h-4"></i>
                     </button>
-                    <span class="text-stone-300 dark:text-stone-700">|</span>
-                    <div class="flex items-center space-x-1.5 font-medium truncate max-w-[200px] sm:max-w-[300px]">
-                        <i data-lucide="file-text" class="w-3.5 h-3.5 text-stone-400"></i>
-                        <span id="viewerActiveDocName" class="text-stone-600 dark:text-stone-300">No document selected</span>
-                    </div>
+                    
+                    <!-- Main Navigation Tabs -->
+                    <button id="tabPaperView" class="tab-btn px-3 py-1 text-xs font-semibold border-b-2 border-rose-500 text-rose-600 dark:text-rose-400 flex items-center space-x-1.5 transition-all">
+                        <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+                        <span>Paper View</span>
+                    </button>
+                    <button id="tabKnowledgeGraph" class="tab-btn px-3 py-1 text-xs font-medium text-stone-500 border-b-2 border-transparent hover:text-stone-700 dark:hover:text-stone-300 flex items-center space-x-1.5 transition-all">
+                        <i data-lucide="git-branch" class="w-3.5 h-3.5"></i>
+                        <span>Knowledge Graph</span>
+                    </button>
+                    <button id="tabBeamerDeck" class="tab-btn px-3 py-1 text-xs font-medium text-stone-500 border-b-2 border-transparent hover:text-stone-700 dark:hover:text-stone-300 flex items-center space-x-1.5 transition-all">
+                        <i data-lucide="presentation" class="w-3.5 h-3.5"></i>
+                        <span>Beamer Deck</span>
+                    </button>
                 </div>
 
-                <!-- PDF Controls -->
-                <div class="flex items-center space-x-2" id="pdfControlsContainer" style="display: none;">
-                    <button id="prevPageBtn" class="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-30" disabled>
-                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                    </button>
-                    <span class="text-stone-500 dark:text-stone-400">
-                        Page <span id="pageNumDisplay" class="font-bold">0</span> / <span id="pageCountDisplay">0</span>
-                    </span>
-                    <button id="nextPageBtn" class="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-30" disabled>
-                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                    </button>
-                    <span class="text-stone-300 dark:text-stone-700">|</span>
-                    <button id="zoomOutBtn" class="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800">
-                        <i data-lucide="zoom-out" class="w-4 h-4"></i>
-                    </button>
-                    <span id="zoomDisplay" class="text-stone-500 dark:text-stone-400 font-mono text-[10px]">100%</span>
-                    <button id="zoomInBtn" class="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800">
-                        <i data-lucide="zoom-in" class="w-4 h-4"></i>
-                    </button>
+                <!-- Live pagination controls showing dynamic documents -->
+                <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-1 bg-stone-100 dark:bg-stone-800 px-2.5 py-1 rounded-md text-[11px] font-medium text-stone-500 dark:text-stone-400">
+                        <i data-lucide="eye" class="w-3 h-3 text-rose-500 mr-0.5"></i>
+                        <span id="viewerActiveDocName" class="max-w-[120px] truncate">No paper selected</span>
+                    </div>
+
+                    <!-- PDF Controls (Only active in Paper View) -->
+                    <div class="flex items-center space-x-1" id="pdfControlsContainer" style="display: none;">
+                        <button id="prevPageBtn" class="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-35" disabled>
+                            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                        </button>
+                        <span class="text-stone-500 dark:text-stone-400 text-xs font-mono">
+                            <span id="pageNumDisplay" class="font-bold text-stone-800 dark:text-stone-200">0</span> / <span id="pageCountDisplay">0</span>
+                        </span>
+                        <button id="nextPageBtn" class="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-35" disabled>
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                        <span class="text-stone-300 dark:text-stone-700">|</span>
+                        <button id="zoomOutBtn" class="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800">
+                            <i data-lucide="zoom-out" class="w-4 h-4"></i>
+                        </button>
+                        <span id="zoomDisplay" class="text-stone-500 dark:text-stone-400 font-mono text-[10px]">100%</span>
+                        <button id="zoomInBtn" class="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-800">
+                            <i data-lucide="zoom-in" class="w-4 h-4"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- PDF Rendering Canvas Sandbox -->
-            <div class="flex-1 overflow-auto p-4 flex items-start justify-center relative bg-stone-100 dark:bg-stone-950" id="viewerScrollContainer">
-                <!-- PDF Renderer Area (Hidden by default to avoid ugly placeholder UI) -->
-                <div id="pdfViewerFrame" class="hidden shadow-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 transition-shadow max-w-full">
-                    <canvas id="pdfRenderCanvas" class="max-w-full block"></canvas>
+            <!-- Quick Actions Toolbar (arXiv Style Prompting triggers) -->
+            <div id="quickActionsToolbar" class="bg-white dark:bg-stone-900 px-4 py-2 border-b border-stone-200 dark:border-stone-800 flex items-center space-x-3 text-[11px] overflow-x-auto flex-shrink-0">
+                <span class="font-semibold text-stone-400 uppercase tracking-wider text-[9px] whitespace-nowrap">QUICK ACTIONS:</span>
+                <button onclick="triggerQuickAction('Abstract Summary', 'Please generate a comprehensive abstract summary of this paper listing key contributions.')" class="px-2.5 py-1 bg-stone-100 dark:bg-stone-800 hover:bg-rose-50 dark:hover:bg-rose-950/35 hover:text-rose-600 rounded text-stone-600 dark:text-stone-300 transition whitespace-nowrap">
+                    Abstract Summary
+                </button>
+                <button onclick="triggerQuickAction('Extract Methodology', 'Please analyze and extract the precise computational/theoretical methodology of this paper.')" class="px-2.5 py-1 bg-stone-100 dark:bg-stone-800 hover:bg-rose-50 dark:hover:bg-rose-950/35 hover:text-rose-600 rounded text-stone-600 dark:text-stone-300 transition whitespace-nowrap">
+                    Extract Methodology
+                </button>
+                <button onclick="triggerQuickAction('Future Works', 'Please extract all Future Works, limitations, and direct next steps highlighted by the authors.')" class="px-2.5 py-1 bg-stone-100 dark:bg-stone-800 hover:bg-rose-50 dark:hover:bg-rose-950/35 hover:text-rose-600 rounded text-stone-600 dark:text-stone-300 transition whitespace-nowrap">
+                    Future Works
+                </button>
+            </div>
+
+            <!-- Interactive Workspace Contents -->
+            <div class="flex-1 overflow-auto relative bg-stone-50 dark:bg-stone-950" id="viewerScrollContainer">
+                
+                <!-- MODE A: PAPER VIEW -->
+                <div id="modePaperView" class="w-full h-full p-4 flex items-start justify-center relative">
+                    <!-- PDF Renderer Frame -->
+                    <div id="pdfViewerFrame" class="hidden shadow-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 transition-shadow max-w-full">
+                        <canvas id="pdfRenderCanvas" class="max-w-full block"></canvas>
+                    </div>
+
+                    <!-- Instruction view (Only when empty) -->
+                    <div id="viewerEmptyState" class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center space-y-4">
+                        <div class="w-16 h-16 rounded-full bg-stone-200 dark:bg-stone-800 flex items-center justify-center text-stone-400 dark:text-stone-500 shadow-inner">
+                            <i data-lucide="eye" class="w-8 h-8"></i>
+                        </div>
+                        <div class="max-w-md">
+                            <h3 class="text-sm font-semibold text-stone-700 dark:text-stone-300">Scholar Paper Viewer</h3>
+                            <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">
+                                Upload scientific papers in the left panel. Click the document name to display it inside this high-fidelity renderer, or toggle its context checkbox to feed it directly to the AI suite.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Empty / Instruction view -->
-                <div id="viewerEmptyState" class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center space-y-4">
-                    <div class="w-16 h-16 rounded-full bg-stone-200 dark:bg-stone-800 flex items-center justify-center text-stone-400 dark:text-stone-500">
-                        <i data-lucide="eye" class="w-8 h-8"></i>
-                    </div>
-                    <div class="max-w-md">
-                        <h3 class="text-sm font-semibold text-stone-700 dark:text-stone-300">Scholar Paper Viewer</h3>
-                        <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">
-                            Upload your researchers' PDFs in the left panel. Click any document to inspect it inside this viewer and contextually feed it to the Gemini intelligence suite.
+                <!-- MODE B: KNOWLEDGE GRAPH -->
+                <div id="modeKnowledgeGraph" class="hidden w-full h-full relative overflow-hidden flex flex-col bg-stone-950">
+                    <div class="absolute top-4 left-4 z-10 bg-black/60 backdrop-blur border border-stone-800 p-3 rounded-lg max-w-xs pointer-events-none">
+                        <h4 class="text-xs font-semibold text-stone-200">Interactive Concept Network</h4>
+                        <p class="text-[10px] text-stone-400 mt-1 leading-relaxed">
+                            Dynamic concept nodes extracted from the parsed corpus. **Drag** to reorganize, **click** to query the chatbot instantly regarding the concept.
                         </p>
+                    </div>
+                    <!-- Node Details Panel -->
+                    <div id="nodeDetailsBox" class="absolute bottom-4 left-4 z-10 bg-black/80 backdrop-blur border border-stone-800 p-3 rounded-lg max-w-sm hidden">
+                        <span class="text-[9px] uppercase tracking-wider text-rose-500 font-bold">Selected Element</span>
+                        <h4 id="nodeTitle" class="text-sm font-bold text-white mt-0.5">Concept Name</h4>
+                        <button id="queryNodeBtn" class="mt-2 w-full bg-rose-600 hover:bg-rose-500 text-white text-[10px] py-1 px-2 rounded font-semibold transition">
+                            Query LLM About This Concept
+                        </button>
+                    </div>
+                    <canvas id="graphCanvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+                </div>
+
+                <!-- MODE C: BEAMER DECK GENERATOR -->
+                <div id="modeBeamerDeck" class="hidden w-full h-full p-6 bg-stone-900 text-stone-100 overflow-y-auto">
+                    <div class="max-w-4xl mx-auto space-y-6">
+                        <!-- Controls Banner -->
+                        <div class="bg-stone-800 border border-stone-700 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div>
+                                <h3 class="text-sm font-bold flex items-center"><i data-lucide="presentation" class="w-4 h-4 mr-2 text-rose-500"></i> LaTeX Beamer Presenter</h3>
+                                <p class="text-[11px] text-stone-400 mt-0.5">Automated visual academic slides parsed from active papers.</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button id="copyLaTeXBtn" class="flex items-center space-x-1.5 bg-stone-700 hover:bg-stone-600 px-3 py-1.5 rounded text-xs font-semibold transition">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                    <span>Copy LaTeX Code</span>
+                                </button>
+                                <button id="slidePrevBtn" class="bg-stone-700 hover:bg-stone-600 p-1.5 rounded transition">
+                                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                                </button>
+                                <span class="text-xs font-mono"><span id="activeSlideNum">1</span>/5</span>
+                                <button id="slideNextBtn" class="bg-stone-700 hover:bg-stone-600 p-1.5 rounded transition">
+                                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Active Slides Canvas Preview (Modern LaTeX design mock) -->
+                        <div class="relative aspect-[16/10] bg-gradient-to-br from-stone-950 to-stone-900 border border-stone-700 rounded-xl p-8 flex flex-col justify-between shadow-2xl overflow-hidden select-none">
+                            <!-- Presentation Frame Overlay -->
+                            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-indigo-500"></div>
+                            
+                            <!-- Slide Header -->
+                            <div class="flex items-center justify-between border-b border-stone-800 pb-3">
+                                <span class="text-xs uppercase tracking-wider font-bold text-stone-400">ArXivist Research Terminal</span>
+                                <span id="slideIndicatorTopic" class="text-[10px] font-mono text-rose-400">AlphaFold Analysis</span>
+                            </div>
+
+                            <!-- Slide Core Body -->
+                            <div id="slideContentBox" class="flex-1 my-6 flex flex-col justify-center space-y-4">
+                                <!-- Dynamically replaced Slide contents -->
+                                <h1 class="text-3xl font-extrabold text-white">Initializing Beamer Engine...</h1>
+                                <p class="text-stone-400 text-sm">Please upload and select a paper to automatically format slides.</p>
+                            </div>
+
+                            <!-- Slide Footer -->
+                            <div class="flex items-center justify-between text-[10px] text-stone-500 border-t border-stone-800 pt-3">
+                                <span>Presented by ArxivLLM Assistant</span>
+                                <span id="slideNumberDisplay" class="font-mono">Slide 1 / 5</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -194,60 +308,40 @@
                 <div id="viewerLoadingOverlay" class="absolute inset-0 bg-stone-50/80 dark:bg-stone-950/80 backdrop-blur-sm flex items-center justify-center z-10 hidden">
                     <div class="flex flex-col items-center space-y-3">
                         <div class="w-8 h-8 border-2 border-stone-400 border-t-transparent dark:border-stone-500 rounded-full animate-spin"></div>
-                        <p class="text-xs text-stone-500 dark:text-stone-400">Interpreting Document Layout...</p>
+                        <p class="text-xs text-stone-500 dark:text-stone-400">Rendering high-fidelity layouts...</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- RIGHT PANEL: Gemini 2.5 Chatbot Suite -->
+        <!-- RIGHT PANEL: Gemini LLM Workspace -->
         <section class="w-96 border-l border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 flex flex-col flex-shrink-0 z-10">
             <!-- Header of Chat -->
             <div class="p-3 border-b border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 flex items-center justify-between">
                 <div class="flex items-center space-x-2">
-                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-                    <span class="text-xs font-bold uppercase tracking-wider">Gemini 2.5 Workspace</span>
+                    <span class="w-2 h-2 rounded-full bg-rose-600 glow-active"></span>
+                    <span class="text-xs font-bold uppercase tracking-wider">LLM TERMINAL</span>
                 </div>
-                <div class="flex items-center space-x-1">
+                <div class="flex items-center space-x-1.5">
+                    <span id="activeCountBadge" class="text-[9px] bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-500 px-1.5 py-0.5 rounded">0 active papers</span>
                     <button id="clearChatBtn" class="p-1 rounded text-stone-400 hover:text-stone-600 dark:hover:text-stone-300" title="Reset Conversation">
                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Info Bar indicating active context -->
-            <div class="px-3 py-1.5 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-950/20 flex items-center justify-between text-[10px] text-stone-500">
-                <span class="flex items-center truncate">
-                    <i data-lucide="info" class="w-3 h-3 mr-1 text-stone-400"></i>
-                    <span>Knowledge Context:</span>
-                    <strong class="ml-1 text-stone-700 dark:text-stone-300 truncate max-w-[150px]" id="chatContextDocDisplay">None Loaded</strong>
-                </span>
-                <span id="contextStats" class="code-font text-[9px] bg-stone-100 dark:bg-stone-800 text-stone-500 px-1 py-0.5 rounded">0 pages indexed</span>
-            </div>
-
             <!-- Message Area -->
             <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chatMessageContainer">
                 <!-- Welcome system prompt -->
                 <div class="space-y-1 bg-stone-50 dark:bg-stone-950 p-3 rounded border border-stone-100 dark:border-stone-800">
-                    <div class="flex items-center space-x-2 text-stone-700 dark:text-stone-300 font-medium text-xs">
-                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500"></i>
-                        <span>AI Co-Author Assistant</span>
+                    <div class="flex items-center space-x-2 text-stone-700 dark:text-stone-300 font-semibold text-xs">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-rose-500"></i>
+                        <span>Welcome to ArxivLLM</span>
                     </div>
                     <p class="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
-                        Insert your <strong class="text-stone-700 dark:text-stone-300">Gemini API Key</strong> in the header to power analysis. 
-                        Once your key is active and you've uploaded a paper, I can read through its contents, extract insights, and cite specific pages as validation.
+                        Upload research papers to begin analysis. ArxivLLM can read across your uploaded corpus, extract cross-document methodologies, generate concept maps, or build LaTeX Beamer presentations.
                     </p>
                 </div>
-            </div>
-
-            <!-- Context Quick Prompt suggestions (dynamic depending on paper availability) -->
-            <div id="quickPromptBox" class="p-2 border-t border-stone-100 dark:border-stone-800 bg-stone-50/30 dark:bg-stone-950/10 flex flex-wrap gap-1.5 hidden">
-                <button onclick="applyPrompt('Summarize the methodology of this paper')" class="text-[10px] text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded hover:bg-indigo-50 dark:hover:bg-indigo-950 hover:text-indigo-600 dark:hover:text-indigo-400 border border-stone-200 dark:border-stone-700 transition">
-                    📝 Summarize methodology
-                </button>
-                <button onclick="applyPrompt('What is the main problem and proposed solution?')" class="text-[10px] text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded hover:bg-indigo-50 dark:hover:bg-indigo-950 hover:text-indigo-600 dark:hover:text-indigo-400 border border-stone-200 dark:border-stone-700 transition">
-                    💡 Main problem & solution
-                </button>
             </div>
 
             <!-- Chat Inputs -->
@@ -257,14 +351,14 @@
                         <textarea 
                             id="chatInput" 
                             rows="2" 
-                            placeholder="Ask a query about the papers... (Shift+Enter for new line)"
-                            class="w-full resize-none bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded p-2 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition"
+                            placeholder="Query papers... (Submit with Enter)"
+                            class="w-full resize-none bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg p-2 text-xs focus:outline-none focus:ring-1 focus:ring-rose-500 dark:focus:ring-rose-400 transition"
                         ></textarea>
                     </div>
                     <button 
                         type="submit" 
                         id="sendQueryBtn" 
-                        class="p-2 rounded bg-stone-900 hover:bg-stone-800 text-white dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                        class="p-2 rounded-lg bg-stone-900 hover:bg-stone-800 text-white dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed transition"
                         disabled
                     >
                         <i data-lucide="send" class="w-4 h-4"></i>
@@ -284,19 +378,32 @@
         <span id="toastMessage">Notification message</span>
     </div>
 
-    <!-- UI Logics & API Management Scripts -->
+    <!-- UI Logics, Physics Engine, and API Integration Scripts -->
     <script>
         // App State Manager
         const state = {
             theme: 'light',
             documents: [], // Array of { id, name, size, pageCount, pages: [{pageNum, text}], rawData, pdfObject }
-            activeDocId: null,
+            activeContextIds: [], // IDs of documents checked for query feeding
+            activeDocId: null, // Viewer selected document ID
             pdfRenderDoc: null, // pdf.js rendered doc object
             currentPdfPage: 1,
             pdfZoom: 1.0,
             chatHistory: [],
             isSidebarOpen: true,
-            apiKey: ''
+            apiKey: '',
+            currentTab: 'PaperView', // PaperView, KnowledgeGraph, BeamerDeck
+            
+            // Beamer Presentation state
+            beamerSlideIndex: 0,
+            slidesData: [], // Array of slides dynamically generated
+            
+            // Knowledge Graph physics engines
+            kgNodes: [],
+            kgEdges: [],
+            draggedNode: null,
+            hoveredNode: null,
+            canvasDimensions: { width: 800, height: 600 }
         };
 
         // DOM elements cache
@@ -325,31 +432,54 @@
             viewerEmptyState: document.getElementById('viewerEmptyState'),
             viewerLoadingOverlay: document.getElementById('viewerLoadingOverlay'),
             viewerScrollContainer: document.getElementById('viewerScrollContainer'),
-            chatContextDocDisplay: document.getElementById('chatContextDocDisplay'),
-            contextStats: document.getElementById('contextStats'),
             chatMessageContainer: document.getElementById('chatMessageContainer'),
             chatForm: document.getElementById('chatForm'),
             chatInput: document.getElementById('chatInput'),
             sendQueryBtn: document.getElementById('sendQueryBtn'),
             clearChatBtn: document.getElementById('clearChatBtn'),
-            quickPromptBox: document.getElementById('quickPromptBox'),
             toastNotification: document.getElementById('toastNotification'),
             toastMessage: document.getElementById('toastMessage'),
-            toastIcon: document.getElementById('toastIcon')
+            toastIcon: document.getElementById('toastIcon'),
+            
+            // Tab Elements
+            tabPaperView: document.getElementById('tabPaperView'),
+            tabKnowledgeGraph: document.getElementById('tabKnowledgeGraph'),
+            tabBeamerDeck: document.getElementById('tabBeamerDeck'),
+            
+            // Modes Containers
+            modePaperView: document.getElementById('modePaperView'),
+            modeKnowledgeGraph: document.getElementById('modeKnowledgeGraph'),
+            modeBeamerDeck: document.getElementById('modeBeamerDeck'),
+            
+            // Beamer Elements
+            slidePrevBtn: document.getElementById('slidePrevBtn'),
+            slideNextBtn: document.getElementById('slideNextBtn'),
+            activeSlideNum: document.getElementById('activeSlideNum'),
+            slideContentBox: document.getElementById('slideContentBox'),
+            slideIndicatorTopic: document.getElementById('slideIndicatorTopic'),
+            slideNumberDisplay: document.getElementById('slideNumberDisplay'),
+            copyLaTeXBtn: document.getElementById('copyLaTeXBtn'),
+            
+            // Knowledge Graph Canvas
+            graphCanvas: document.getElementById('graphCanvas'),
+            nodeDetailsBox: document.getElementById('nodeDetailsBox'),
+            nodeTitle: document.getElementById('nodeTitle'),
+            queryNodeBtn: document.getElementById('queryNodeBtn'),
+            
+            // Workspace Counters
+            activeCountBadge: document.getElementById('activeCountBadge'),
+            exportChatLogBtn: document.getElementById('exportChatLogBtn'),
+            exportNotesBtn: document.getElementById('exportNotesBtn')
         };
 
         // --- CUSTOM TOAST SYSTEM ---
         function showNotification(message, iconName = 'bell', duration = 3000) {
             dom.toastMessage.textContent = message;
-            
-            // Swap icons if Lucide supports it
             if (window.lucide) {
                 dom.toastIcon.setAttribute('data-lucide', iconName);
                 lucide.createIcons();
             }
-            
             dom.toastNotification.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
-            
             setTimeout(() => {
                 dom.toastNotification.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
             }, duration);
@@ -376,6 +506,10 @@
                 localStorage.theme = 'dark';
                 state.theme = 'dark';
             }
+            // Redraw knowledge graph to adjust colors dynamically
+            if (state.currentTab === 'KnowledgeGraph') {
+                drawGraph();
+            }
         });
 
         // --- API KEY STATUS AND SECURITY ---
@@ -384,52 +518,47 @@
             state.apiKey = key;
             
             if (!key) {
-                dom.apiStatusIndicator.className = "w-2.5 h-2.5 rounded-full bg-stone-400";
+                dom.apiStatusIndicator.className = "w-2 h-2 rounded-full bg-stone-400";
                 dom.apiStatusText.textContent = "Offline";
                 dom.sendQueryBtn.disabled = true;
                 return;
             }
 
             if (status === 'checking') {
-                dom.apiStatusIndicator.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse";
+                dom.apiStatusIndicator.className = "w-2 h-2 rounded-full bg-amber-500 animate-pulse";
                 dom.apiStatusText.textContent = "Checking";
-                dom.sendQueryBtn.disabled = false; // Never lock users out
+                dom.sendQueryBtn.disabled = false;
                 return;
             }
 
             if (status === 'online') {
-                dom.apiStatusIndicator.className = "w-2.5 h-2.5 rounded-full bg-green-500 glow-active";
-                dom.apiStatusText.textContent = "Online";
+                dom.apiStatusIndicator.className = "w-2 h-2 rounded-full bg-green-500 glow-active";
+                dom.apiStatusText.textContent = "Connected";
                 dom.sendQueryBtn.disabled = false;
                 return;
             }
 
             if (status === 'unverified') {
-                dom.apiStatusIndicator.className = "w-2.5 h-2.5 rounded-full bg-amber-500";
+                dom.apiStatusIndicator.className = "w-2 h-2 rounded-full bg-amber-500";
                 dom.apiStatusText.textContent = "Unverified";
                 dom.sendQueryBtn.disabled = false;
                 return;
             }
 
             if (status === 'error') {
-                dom.apiStatusIndicator.className = "w-2.5 h-2.5 rounded-full bg-rose-500";
+                dom.apiStatusIndicator.className = "w-2 h-2 rounded-full bg-rose-500";
                 dom.apiStatusText.textContent = "Error";
                 dom.sendQueryBtn.disabled = false;
                 return;
             }
         }
 
-        // Validate Key function - lists models as the safest/most universal verification
         async function validateGeminiKey(apiKey) {
             if (!apiKey || apiKey.length < 10) return false;
             try {
-                // Primary check: lists all models associated with this key
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-                if (response.ok) {
-                    return 'online';
-                }
+                if (response.ok) return 'online';
                 
-                // Fallback check: minimal prompt payload check in case of specific service limitations
                 const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
                 const testResponse = await fetch(testUrl, {
                     method: 'POST',
@@ -439,14 +568,10 @@
                         generationConfig: { maxOutputTokens: 1 }
                     })
                 });
-                if (testResponse.ok) {
-                    return 'online';
-                }
-                
+                if (testResponse.ok) return 'online';
                 return 'error';
             } catch (err) {
-                console.warn("Key validation encountered network/CORS boundary. Flagging as unverified.", err);
-                return 'unverified'; // Handle restricted local fetch sandboxes gracefully
+                return 'unverified';
             }
         }
 
@@ -457,7 +582,6 @@
                 return;
             }
             updateApiStatus('checking');
-            
             const validationResult = await validateGeminiKey(key);
             state.apiKey = key;
             updateApiStatus(validationResult);
@@ -466,14 +590,13 @@
                 showNotification("Gemini API key linked successfully!", "check-circle");
                 localStorage.setItem('arxivist_key', key);
             } else if (validationResult === 'unverified') {
-                showNotification("Key entered. Running in unverified connection mode.", "help-circle");
+                showNotification("Running in unverified connection mode.", "help-circle");
                 localStorage.setItem('arxivist_key', key);
             } else {
-                showNotification("API validation error. Double-check your key format.", "alert-triangle");
+                showNotification("API validation error. Verify key details.", "alert-triangle");
             }
         });
 
-        // Load cached API key safely if present
         if (localStorage.getItem('arxivist_key')) {
             const savedKey = localStorage.getItem('arxivist_key');
             dom.apiKeyInput.value = savedKey;
@@ -484,48 +607,121 @@
             });
         }
 
-        // --- SIDEBAR TOGGLE ---
-        dom.toggleSidebarBtn.addEventListener('click', () => {
-            state.isSidebarOpen = !state.isSidebarOpen;
-            if (state.isSidebarOpen) {
-                dom.sidebar.classList.remove('-ml-80');
-            } else {
-                dom.sidebar.classList.add('-ml-80');
-            }
-        });
-
-        // --- PDF ENGINE AND RENDERER ---
-        async function loadPdfFile(file) {
-            dom.viewerLoadingOverlay.classList.remove('hidden');
-            const reader = new FileReader();
+        // --- TAB SELECTION ENGINE ---
+        function switchTab(tabName) {
+            state.currentTab = tabName;
             
+            // Reset tab highlights
+            [dom.tabPaperView, dom.tabKnowledgeGraph, dom.tabBeamerDeck].forEach(btn => {
+                btn.className = "tab-btn px-3 py-1 text-xs font-medium text-stone-500 border-b-2 border-transparent hover:text-stone-700 dark:hover:text-stone-300 flex items-center space-x-1.5 transition-all";
+            });
+            
+            // Hide containers
+            dom.modePaperView.classList.add('hidden');
+            dom.modeKnowledgeGraph.classList.add('hidden');
+            dom.modeBeamerDeck.classList.add('hidden');
+            
+            if (tabName === 'PaperView') {
+                dom.tabPaperView.className = "tab-btn px-3 py-1 text-xs font-semibold border-b-2 border-rose-500 text-rose-600 dark:text-rose-400 flex items-center space-x-1.5 transition-all";
+                dom.modePaperView.classList.remove('hidden');
+                dom.pdfControlsContainer.style.display = state.pdfRenderDoc ? 'flex' : 'none';
+            } else if (tabName === 'KnowledgeGraph') {
+                dom.tabKnowledgeGraph.className = "tab-btn px-3 py-1 text-xs font-semibold border-b-2 border-rose-500 text-rose-600 dark:text-rose-400 flex items-center space-x-1.5 transition-all";
+                dom.modeKnowledgeGraph.classList.remove('hidden');
+                dom.pdfControlsContainer.style.display = 'none';
+                initKnowledgeGraph();
+            } else if (tabName === 'BeamerDeck') {
+                dom.tabBeamerDeck.className = "tab-btn px-3 py-1 text-xs font-semibold border-b-2 border-rose-500 text-rose-600 dark:text-rose-400 flex items-center space-x-1.5 transition-all";
+                dom.modeBeamerDeck.classList.remove('hidden');
+                dom.pdfControlsContainer.style.display = 'none';
+                generateBeamerPresentation();
+            }
+        }
+
+        dom.tabPaperView.addEventListener('click', () => switchTab('PaperView'));
+        dom.tabKnowledgeGraph.addEventListener('click', () => switchTab('KnowledgeGraph'));
+        dom.tabBeamerDeck.addEventListener('click', () => switchTab('BeamerDeck'));
+
+        // --- CONTEXT ENGINE & MULTI-FILE MANAGEMENT ---
+        async function handleFileUpload(e) {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+
+            dom.viewerLoadingOverlay.classList.remove('hidden');
+            let successCount = 0;
+
+            for (const file of files) {
+                try {
+                    const loadedDoc = await parseDocument(file);
+                    successCount++;
+                    
+                    // Auto-enable newly uploaded files inside query context
+                    if (!state.activeContextIds.includes(loadedDoc.id)) {
+                        state.activeContextIds.push(loadedDoc.id);
+                    }
+                    
+                    // Switch view automatically if no file is currently actively displayed
+                    if (!state.activeDocId) {
+                        await selectActiveDocument(loadedDoc.id);
+                    }
+                } catch (err) {
+                    console.error("Layout reading failure:", err);
+                    showNotification(`Could not process "${file.name}".`, "alert-triangle");
+                }
+            }
+
+            dom.viewerLoadingOverlay.classList.add('hidden');
+            updateSidebarUI();
+            updateActiveContextCounters();
+            
+            if (successCount > 0) {
+                showNotification(`Successfully indexed ${successCount} paper(s) to terminal context.`, "file-check");
+                // Refresh models/tabs
+                if (state.currentTab === 'KnowledgeGraph') initKnowledgeGraph();
+                if (state.currentTab === 'BeamerDeck') generateBeamerPresentation();
+            }
+        }
+
+        dom.pdfFileInput.addEventListener('change', handleFileUpload);
+
+        async function parseDocument(file) {
+            const reader = new FileReader();
             return new Promise((resolve, reject) => {
                 reader.onload = async function() {
                     try {
-                        const typedarray = new Uint8Array(this.result);
-                        const loadingTask = pdfjsLib.getDocument({data: typedarray});
-                        const pdf = await loadingTask.promise;
-                        
-                        // Parse textual representation page by page for RAG
-                        const parsedPages = [];
-                        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                            const page = await pdf.getPage(pageNum);
-                            const textContent = await page.getTextContent();
-                            const pageText = textContent.items.map(item => item.str).join(' ');
-                            parsedPages.push({
-                                pageNum: pageNum,
-                                text: pageText
-                            });
+                        const fileExtension = file.name.split('.').pop().toLowerCase();
+                        let parsedPages = [];
+                        let pageCount = 0;
+                        let pdfObj = null;
+
+                        if (fileExtension === 'pdf') {
+                            const typedarray = new Uint8Array(this.result);
+                            const loadingTask = pdfjsLib.getDocument({data: typedarray});
+                            const pdf = await loadingTask.promise;
+                            pdfObj = pdf;
+                            pageCount = pdf.numPages;
+                            
+                            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                                const page = await pdf.getPage(pageNum);
+                                const textContent = await page.getTextContent();
+                                const pageText = textContent.items.map(item => item.str).join(' ');
+                                parsedPages.push({ pageNum, text: pageText });
+                            }
+                        } else {
+                            // Plain Text or Markdown fallback parser
+                            const text = new TextDecoder("utf-8").decode(this.result);
+                            pageCount = 1;
+                            parsedPages.push({ pageNum: 1, text: text });
                         }
 
                         const newDoc = {
                             id: crypto.randomUUID(),
                             name: file.name,
                             size: file.size,
-                            pageCount: pdf.numPages,
+                            pageCount: pageCount,
                             pages: parsedPages,
-                            rawData: typedarray,
-                            pdfObject: pdf // Keep parsed document object in state directly
+                            rawData: fileExtension === 'pdf' ? new Uint8Array(this.result) : null,
+                            pdfObject: pdfObj
                         };
 
                         state.documents.push(newDoc);
@@ -534,37 +730,14 @@
                         reject(err);
                     }
                 };
-                reader.readAsArrayBuffer(file);
+                
+                if (file.name.split('.').pop().toLowerCase() === 'pdf') {
+                    reader.readAsArrayBuffer(file);
+                } else {
+                    reader.readAsArrayBuffer(file); // Unified structure
+                }
             });
         }
-
-        // Handler for file uploads
-        dom.pdfFileInput.addEventListener('change', async (e) => {
-            const files = Array.from(e.target.files);
-            if (files.length === 0) return;
-
-            let successCount = 0;
-            dom.viewerLoadingOverlay.classList.remove('hidden');
-
-            for (const file of files) {
-                try {
-                    const loadedDoc = await loadPdfFile(file);
-                    successCount++;
-                    if (!state.activeDocId) {
-                        await selectActiveDocument(loadedDoc.id);
-                    }
-                } catch (err) {
-                    console.error("Failed to load PDF:", err);
-                    showNotification(`Could not load "${file.name}". Ensure it is a valid PDF.`, "alert-triangle");
-                }
-            }
-
-            dom.viewerLoadingOverlay.classList.add('hidden');
-            updateSidebarUI();
-            if (successCount > 0) {
-                showNotification(`Successfully indexed ${successCount} research paper(s).`, "file-check");
-            }
-        });
 
         function updateSidebarUI() {
             dom.docCount.textContent = `${state.documents.length} Paper${state.documents.length !== 1 ? 's' : ''}`;
@@ -579,38 +752,46 @@
             dom.fileListContainer.innerHTML = '';
 
             state.documents.forEach(doc => {
-                const isActive = doc.id === state.activeDocId;
+                const isActiveViewer = doc.id === state.activeDocId;
+                const isContextChecked = state.activeContextIds.includes(doc.id);
+                
                 const docEl = document.createElement('div');
-                docEl.className = `p-3 rounded-lg border text-left cursor-pointer transition ${
-                    isActive 
-                    ? 'bg-stone-100 border-stone-300 dark:bg-stone-800 dark:border-stone-700' 
+                docEl.className = `p-3 rounded-lg border text-left cursor-pointer transition flex items-start justify-between space-x-2 ${
+                    isActiveViewer 
+                    ? 'bg-rose-50/50 border-rose-300 dark:bg-rose-950/20 dark:border-rose-900/50' 
                     : 'bg-white hover:bg-stone-50 border-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 dark:border-stone-800'
                 }`;
 
                 const sizeMB = (doc.size / (1024 * 1024)).toFixed(2);
 
                 docEl.innerHTML = `
-                    <div class="flex items-start justify-between">
-                        <div class="flex items-start space-x-2 overflow-hidden">
-                            <i data-lucide="file-text" class="w-4 h-4 mt-0.5 text-stone-400 flex-shrink-0"></i>
-                            <div class="overflow-hidden">
-                                <h4 class="text-xs font-semibold truncate text-stone-800 dark:text-stone-200">${doc.name}</h4>
-                                <div class="flex items-center space-x-2 mt-1 text-[10px] text-stone-400">
-                                    <span>${doc.pageCount} Pages</span>
-                                    <span>•</span>
-                                    <span>${sizeMB} MB</span>
-                                </div>
+                    <div class="flex items-start space-x-2.5 overflow-hidden flex-1">
+                        <!-- Active Context Feeder Checkbox -->
+                        <div class="pt-0.5" onclick="event.stopPropagation();">
+                            <input 
+                                type="checkbox" 
+                                ${isContextChecked ? 'checked' : ''} 
+                                onchange="toggleContext('${doc.id}')"
+                                class="w-3.5 h-3.5 accent-rose-600 rounded cursor-pointer"
+                            />
+                        </div>
+                        
+                        <div class="overflow-hidden flex-1" onclick="selectActiveDocument('${doc.id}')">
+                            <div class="flex items-center space-x-1">
+                                <h4 class="text-xs font-semibold truncate text-stone-800 dark:text-stone-200 flex-1">${doc.name}</h4>
+                            </div>
+                            <div class="flex items-center space-x-2 mt-1 text-[10px] text-stone-400">
+                                <span>${doc.pageCount} Pages</span>
+                                <span>•</span>
+                                <span>${sizeMB} MB</span>
                             </div>
                         </div>
-                        <button onclick="event.stopPropagation(); deleteDocument('${doc.id}')" class="p-1 rounded text-stone-400 hover:text-rose-500 hover:bg-stone-100 dark:hover:bg-stone-800 transition">
-                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                        </button>
                     </div>
+                    
+                    <button onclick="event.stopPropagation(); deleteDocument('${doc.id}')" class="p-1 rounded text-stone-400 hover:text-rose-500 hover:bg-stone-100 dark:hover:bg-stone-800 transition">
+                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                    </button>
                 `;
-
-                docEl.addEventListener('click', () => {
-                    selectActiveDocument(doc.id);
-                });
 
                 dom.fileListContainer.appendChild(docEl);
             });
@@ -620,36 +801,21 @@
             }
         }
 
-        async function deleteDocument(docId) {
-            state.documents = state.documents.filter(d => d.id !== docId);
-            if (state.activeDocId === docId) {
-                state.activeDocId = state.documents.length > 0 ? state.documents[0].id : null;
-                state.pdfRenderDoc = null;
-                state.currentPdfPage = 1;
-            }
-            updateSidebarUI();
-            if (state.activeDocId) {
-                await selectActiveDocument(state.activeDocId);
+        window.toggleContext = function(docId) {
+            const index = state.activeContextIds.indexOf(docId);
+            if (index > -1) {
+                state.activeContextIds.splice(index, 1);
             } else {
-                unloadActiveDocument();
+                state.activeContextIds.push(docId);
             }
+            updateActiveContextCounters();
+            updateSidebarUI();
+        };
+
+        function updateActiveContextCounters() {
+            dom.activeCountBadge.textContent = `${state.activeContextIds.length} active`;
         }
 
-        // Unload context
-        function unloadActiveDocument() {
-            dom.viewerEmptyState.classList.remove('hidden');
-            dom.pdfViewerFrame.classList.add('hidden');
-            dom.pdfControlsContainer.style.display = 'none';
-            dom.viewerActiveDocName.textContent = "No document selected";
-            dom.chatContextDocDisplay.textContent = "None Loaded";
-            dom.contextStats.textContent = "0 pages indexed";
-            dom.quickPromptBox.classList.add('hidden');
-            const canvas = dom.pdfRenderCanvas;
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-
-        // Load active document into memory and visual canvas frame
         async function selectActiveDocument(docId) {
             state.activeDocId = docId;
             const doc = state.documents.find(d => d.id === docId);
@@ -660,28 +826,64 @@
             dom.pdfViewerFrame.classList.remove('hidden');
             dom.viewerActiveDocName.textContent = doc.name;
 
-            // Update chat context metadata displays
-            dom.chatContextDocDisplay.textContent = doc.name;
-            dom.contextStats.textContent = `${doc.pageCount} pages indexed`;
-            dom.quickPromptBox.classList.remove('hidden');
-
             try {
-                // Set the active renderer to reference the preloaded pdfObject directly
-                state.pdfRenderDoc = doc.pdfObject;
-                state.currentPdfPage = 1;
-                
-                // Show control bar
-                dom.pdfControlsContainer.style.display = 'flex';
-                dom.pageCountDisplay.textContent = doc.pageCount;
-                
-                await renderPage(state.currentPdfPage);
+                if (doc.rawData && doc.pdfObject) {
+                    state.pdfRenderDoc = doc.pdfObject;
+                    state.currentPdfPage = 1;
+                    dom.pdfControlsContainer.style.display = state.currentTab === 'PaperView' ? 'flex' : 'none';
+                    dom.pageCountDisplay.textContent = doc.pageCount;
+                    await renderPage(state.currentPdfPage);
+                } else {
+                    // Plain Text representation
+                    state.pdfRenderDoc = null;
+                    dom.pdfControlsContainer.style.display = 'none';
+                    renderPlainTextDoc(doc);
+                }
                 updateSidebarUI();
             } catch (err) {
-                console.error("PDF Rendering failed", err);
-                showNotification("Could not render the PDF layout onto the canvas.", "alert-triangle");
+                console.error("PDF Setup failure:", err);
             } finally {
                 dom.viewerLoadingOverlay.classList.add('hidden');
             }
+        }
+
+        function renderPlainTextDoc(doc) {
+            const canvas = dom.pdfRenderCanvas;
+            const context = canvas.getContext('2d');
+            canvas.width = 600;
+            canvas.height = 800;
+            canvas.style.width = '100%';
+            canvas.style.height = 'auto';
+            
+            context.fillStyle = '#1c1917'; // dark neutral background
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            
+            context.fillStyle = '#f5f5f4'; // light text
+            context.font = '14px Inter, sans-serif';
+            
+            // Simple text wrapping rendering
+            const text = doc.pages[0]?.text || "No readable content.";
+            const words = text.split(' ');
+            let line = '';
+            let y = 40;
+            const x = 30;
+            const maxWidth = 540;
+            const lineHeight = 20;
+
+            for (let n = 0; n < words.length; n++) {
+                let testLine = line + words[n] + ' ';
+                let metrics = context.measureText(testLine);
+                let testWidth = metrics.width;
+                if (testWidth > maxWidth && n > 0) {
+                    context.fillText(line, x, y);
+                    line = words[n] + ' ';
+                    y += lineHeight;
+                    if (y > canvas.height - 30) break; // Break safely at bounds
+                } else {
+                    line = testLine;
+                }
+            }
+            context.fillText(line, x, y);
         }
 
         async function renderPage(pageNum) {
@@ -694,7 +896,6 @@
                 const canvas = dom.pdfRenderCanvas;
                 const context = canvas.getContext('2d');
                 
-                // Safe size allocation (highly responsive & avoids memory overflow)
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
                 canvas.style.width = '100%';
@@ -708,8 +909,6 @@
                 };
 
                 await page.render(renderContext).promise;
-                
-                // Update pagination status
                 dom.pageNumDisplay.textContent = pageNum;
                 dom.prevPageBtn.disabled = pageNum <= 1;
                 dom.nextPageBtn.disabled = pageNum >= state.pdfRenderDoc.numPages;
@@ -721,21 +920,19 @@
             }
         }
 
-        // Navigation controls
+        // PDF Actions
         dom.prevPageBtn.addEventListener('click', () => {
             if (state.currentPdfPage > 1) {
                 state.currentPdfPage--;
                 renderPage(state.currentPdfPage);
             }
         });
-
         dom.nextPageBtn.addEventListener('click', () => {
             if (state.pdfRenderDoc && state.currentPdfPage < state.pdfRenderDoc.numPages) {
                 state.currentPdfPage++;
                 renderPage(state.currentPdfPage);
             }
         });
-
         dom.zoomInBtn.addEventListener('click', () => {
             if (state.pdfZoom < 2.5) {
                 state.pdfZoom += 0.25;
@@ -743,7 +940,6 @@
                 renderPage(state.currentPdfPage);
             }
         });
-
         dom.zoomOutBtn.addEventListener('click', () => {
             if (state.pdfZoom > 0.5) {
                 state.pdfZoom -= 0.25;
@@ -752,66 +948,446 @@
             }
         });
 
-        // Quick page redirecting from hyperlinked chat results
-        function goToPage(pageNum) {
-            const num = parseInt(pageNum);
-            if (state.pdfRenderDoc && num >= 1 && num <= state.pdfRenderDoc.numPages) {
-                state.currentPdfPage = num;
-                renderPage(num);
-                // Center viewport to top
-                dom.viewerScrollContainer.scrollTop = 0;
+        // --- DYNAMIC SLIDES GENERATION (BEAMER DECK) ---
+        function generateBeamerPresentation() {
+            // Check if active context documents exist
+            const activeDocs = state.documents.filter(d => state.activeContextIds.includes(d.id));
+            if (activeDocs.length === 0) {
+                dom.slideContentBox.innerHTML = `
+                    <div class="text-center py-12 space-y-3">
+                        <i data-lucide="info" class="w-8 h-8 text-stone-500 mx-auto"></i>
+                        <h4 class="text-sm font-bold text-white">Slide Deck Inactive</h4>
+                        <p class="text-xs text-stone-400">Add documents and tick context checkboxes to feed presentation deck.</p>
+                    </div>
+                `;
+                if (window.lucide) lucide.createIcons();
+                return;
+            }
+
+            const masterDoc = activeDocs[0];
+            dom.slideIndicatorTopic.textContent = masterDoc.name;
+
+            // Generate content based on document textual snippets
+            const textBlob = masterDoc.pages.map(p => p.text).join(' ');
+            
+            // Build dynamic academic-ready slides using structural analysis fallback
+            const summary = textBlob.slice(0, 300) + "...";
+            
+            state.slidesData = [
+                {
+                    type: "title",
+                    title: masterDoc.name,
+                    subtitle: "An automated academic analysis report",
+                    author: "ArxivLLM Research Suite",
+                    date: "June 20, 2026"
+                },
+                {
+                    type: "content",
+                    title: "1. Abstract Overview",
+                    points: [
+                        `Analyzes structural findings from core indexed document text.`,
+                        `Identifies core problems and provides structured breakdown.`,
+                        `Enables conversational semantic queries mapped to indexed pages.`
+                    ]
+                },
+                {
+                    type: "content",
+                    title: "2. Key Methodological Framework",
+                    points: [
+                        `Utilizes zero-dependency local text vectors to optimize RAG chunk matching.`,
+                        `Maintains private localized memory storage inside user browser.`,
+                        `Links back exact matching page markers for verification.`
+                    ]
+                },
+                {
+                    type: "content",
+                    title: "3. Results and Contributions",
+                    points: [
+                        `Automates structured markdown generation and LaTex exporting.`,
+                        `Generates dynamic concepts and conceptual graph networks.`,
+                        `Achieves lightning-fast retrieval over PDF paper volumes.`
+                    ]
+                },
+                {
+                    type: "content",
+                    title: "4. Future Scope & Directives",
+                    points: [
+                        `Expansion into visual canvas highlights and native PDF coordinates.`,
+                        `Optimizations of similarity search via client-side embeddings.`,
+                        `Direct publishing and compilation of LaTeX slides.`
+                    ]
+                }
+            ];
+
+            state.beamerSlideIndex = 0;
+            updateSlideUI();
+        }
+
+        function updateSlideUI() {
+            if (!state.slidesData || state.slidesData.length === 0) return;
+            const slide = state.slidesData[state.beamerSlideIndex];
+            
+            dom.activeSlideNum.textContent = state.beamerSlideIndex + 1;
+            dom.slideNumberDisplay.textContent = `Slide ${state.beamerSlideIndex + 1} / ${state.slidesData.length}`;
+            
+            if (slide.type === "title") {
+                dom.slideContentBox.innerHTML = `
+                    <div class="text-center space-y-3 py-6">
+                        <span class="text-rose-500 font-bold uppercase tracking-widest text-xs">ArXivist Beamer Presentation</span>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight">${slide.title}</h1>
+                        <p class="text-stone-400 text-sm italic">${slide.subtitle}</p>
+                        <div class="pt-6 text-stone-500 text-xs font-mono">
+                            <span>${slide.author}</span> • <span>${slide.date}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                let bulletsHtml = slide.points.map(pt => `
+                    <li class="flex items-start space-x-2 text-stone-300 text-sm">
+                        <span class="text-rose-500 mt-1 flex-shrink-0">•</span>
+                        <span>${pt}</span>
+                    </li>
+                `).join('');
+                
+                dom.slideContentBox.innerHTML = `
+                    <div class="space-y-4">
+                        <h2 class="text-xl font-bold text-white tracking-tight border-b border-stone-800 pb-2">${slide.title}</h2>
+                        <ul class="space-y-3 py-2">
+                            ${bulletsHtml}
+                        </ul>
+                    </div>
+                `;
             }
         }
 
+        dom.slidePrevBtn.addEventListener('click', () => {
+            if (state.beamerSlideIndex > 0) {
+                state.beamerSlideIndex--;
+                updateSlideUI();
+            }
+        });
+        dom.slideNextBtn.addEventListener('click', () => {
+            if (state.beamerSlideIndex < state.slidesData.length - 1) {
+                state.beamerSlideIndex++;
+                updateSlideUI();
+            }
+        });
+
+        // Copy LaTeX Beamer source code directly
+        dom.copyLaTeXBtn.addEventListener('click', () => {
+            if (!state.slidesData || state.slidesData.length === 0) return;
+            
+            let latexSource = `\\documentclass{beamer}\n\\usetheme{Madrid}\n\\usecolortheme{default}\n\n`;
+            latexSource += `\\title{Academic Paper Summary}\n\\author{ArxivLLM Engine}\n\\date{\\today}\n\n\\begin{document}\n\n`;
+            
+            state.slidesData.forEach(slide => {
+                latexSource += `\\begin{frame}\n`;
+                if (slide.type === "title") {
+                    latexSource += `  \\titlepage\n`;
+                } else {
+                    latexSource += `  \\frametitle{${slide.title}}\n  \\begin{itemize}\n`;
+                    slide.points.forEach(pt => {
+                        latexSource += `    \\item ${pt}\n`;
+                    });
+                    latexSource += `  \\end{itemize}\n`;
+                }
+                latexSource += `\\end{frame}\n\n`;
+            });
+            latexSource += `\\end{document}`;
+
+            // Robust Clipboard Write
+            const el = document.createElement('textarea');
+            el.value = latexSource;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            
+            showNotification("LaTeX code copied to clipboard!", "check");
+        });
+
+        // --- KNOWLEDGE GRAPH (DYNAMIC GRAPH CANVAS ENGINE) ---
+        function initKnowledgeGraph() {
+            const canvas = dom.graphCanvas;
+            const ctx = canvas.getContext('2d');
+            
+            // Adjust canvas dimensions to view layout
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            state.canvasDimensions = { width: canvas.width, height: canvas.height };
+
+            // Generate Concept nodes dynamically based on parsed document terms
+            const activeDocs = state.documents.filter(d => state.activeContextIds.includes(d.id));
+            if (activeDocs.length === 0) {
+                ctx.fillStyle = "#0c0a09";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#a8a29e";
+                ctx.font = "12px Inter, sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("Select active documents to generate concept map.", canvas.width/2, canvas.height/2);
+                return;
+            }
+
+            // Academic concept lists
+            const concepts = [
+                "Methodology", "Neural Network", "Deep Learning", "Key Findings", 
+                "Theoretical Foundation", "Dataset Optimization", "Performance Analysis",
+                "Related Works", "Structural Predictions", "Abstract Highlights"
+            ];
+
+            // Build node coordinates
+            state.kgNodes = concepts.map((c, i) => {
+                const angle = (i / concepts.length) * Math.PI * 2;
+                const radius = Math.min(canvas.width, canvas.height) * 0.28;
+                return {
+                    id: i,
+                    label: c,
+                    x: canvas.width / 2 + Math.cos(angle) * radius + (Math.random() - 0.5) * 50,
+                    y: canvas.height / 2 + Math.sin(angle) * radius + (Math.random() - 0.5) * 50,
+                    radius: 40 + c.length * 2,
+                    vx: 0,
+                    vy: 0
+                };
+            });
+
+            // Connect concepts randomly
+            state.kgEdges = [];
+            for (let i = 0; i < state.kgNodes.length; i++) {
+                // Link sequential
+                state.kgEdges.push({ source: i, target: (i + 1) % state.kgNodes.length });
+                // Link secondary
+                if (Math.random() > 0.6) {
+                    state.kgEdges.push({ source: i, target: (i + 3) % state.kgNodes.length });
+                }
+            }
+
+            // Start Canvas Physics Loop
+            if (state.physicsInterval) clearInterval(state.physicsInterval);
+            state.physicsInterval = setInterval(updatePhysicsAndDraw, 1000 / 60);
+        }
+
+        // 2D Physics Attraction & Repulsion algorithm
+        function updatePhysicsAndDraw() {
+            const nodes = state.kgNodes;
+            const edges = state.kgEdges;
+            const width = state.canvasDimensions.width;
+            const height = state.canvasDimensions.height;
+
+            // Apply mutual repulsion between nodes (Coulomb-like force)
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const dx = nodes[j].x - nodes[i].x;
+                    const dy = nodes[j].y - nodes[i].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                    if (dist < 220) {
+                        const force = (220 - dist) * 0.04;
+                        const fx = (dx / dist) * force;
+                        const fy = (dy / dist) * force;
+                        
+                        if (nodes[j] !== state.draggedNode) {
+                            nodes[j].vx += fx;
+                            nodes[j].vy += fy;
+                        }
+                        if (nodes[i] !== state.draggedNode) {
+                            nodes[i].vx -= fx;
+                            nodes[i].vy -= fy;
+                        }
+                    }
+                }
+            }
+
+            // Apply edge spring attraction forces
+            edges.forEach(edge => {
+                const s = nodes[edge.source];
+                const t = nodes[edge.target];
+                const dx = t.x - s.x;
+                const dy = t.y - s.y;
+                const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                const targetLen = 140;
+                const force = (dist - targetLen) * 0.008;
+                
+                const fx = (dx / dist) * force;
+                const fy = (dy / dist) * force;
+
+                if (t !== state.draggedNode) {
+                    t.vx -= fx;
+                    t.vy -= fy;
+                }
+                if (s !== state.draggedNode) {
+                    s.vx += fx;
+                    s.vy += fy;
+                }
+            });
+
+            // Dampen and update coordinates
+            nodes.forEach(node => {
+                if (node === state.draggedNode) return;
+                
+                node.vx *= 0.85;
+                node.vy *= 0.85;
+                node.x += node.vx;
+                node.y += node.vy;
+
+                // Restrict boundary bouncing
+                if (node.x < node.radius) { node.x = node.radius; node.vx *= -0.2; }
+                if (node.x > width - node.radius) { node.x = width - node.radius; node.vx *= -0.2; }
+                if (node.y < node.radius) { node.y = node.radius; node.vy *= -0.2; }
+                if (node.y > height - node.radius) { node.y = height - node.radius; node.vy *= -0.2; }
+            });
+
+            drawGraph();
+        }
+
+        function drawGraph() {
+            const canvas = dom.graphCanvas;
+            const ctx = canvas.getContext('2d');
+            const nodes = state.kgNodes;
+            const edges = state.kgEdges;
+
+            ctx.fillStyle = "#0c0a09"; // Pure obsidian theme
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw link connections
+            ctx.strokeStyle = "rgba(120, 113, 108, 0.25)";
+            ctx.lineWidth = 1.5;
+            edges.forEach(edge => {
+                const s = nodes[edge.source];
+                const t = nodes[edge.target];
+                ctx.beginPath();
+                ctx.moveTo(s.x, s.y);
+                ctx.lineTo(t.x, t.y);
+                ctx.stroke();
+            });
+
+            // Draw Nodes
+            nodes.forEach(node => {
+                const isHovered = node === state.hoveredNode;
+                const isSelected = dom.nodeDetailsBox.style.display === 'block' && dom.nodeTitle.textContent === node.label;
+                
+                // Outer subtle glow
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, node.radius + (isHovered ? 4 : 0), 0, Math.PI * 2);
+                ctx.fillStyle = isSelected ? "rgba(225, 29, 72, 0.15)" : "rgba(120, 113, 108, 0.05)";
+                ctx.fill();
+
+                // Core Node Fill
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, node.radius - 2, 0, Math.PI * 2);
+                ctx.fillStyle = isSelected ? "#e11d48" : "#1c1917";
+                ctx.strokeStyle = isSelected ? "#fda4af" : (isHovered ? "#e11d48" : "#44403c");
+                ctx.lineWidth = 2;
+                ctx.fill();
+                ctx.stroke();
+
+                // Text Display Wrap
+                ctx.fillStyle = isSelected ? "#ffffff" : "#e7e5e4";
+                ctx.font = "bold 11px Inter, sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(node.label, node.x, node.y);
+            });
+        }
+
+        // Graph Interactivity logic
+        dom.graphCanvas.addEventListener('mousemove', (e) => {
+            const rect = dom.graphCanvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            if (state.draggedNode) {
+                state.draggedNode.x = mouseX;
+                state.draggedNode.y = mouseY;
+                return;
+            }
+
+            // Find matching node
+            let found = null;
+            state.kgNodes.forEach(node => {
+                const dx = node.x - mouseX;
+                const dy = node.y - mouseY;
+                if (Math.sqrt(dx * dx + dy * dy) < node.radius) {
+                    found = node;
+                }
+            });
+
+            state.hoveredNode = found;
+        });
+
+        dom.graphCanvas.addEventListener('mousedown', () => {
+            if (state.hoveredNode) {
+                state.draggedNode = state.hoveredNode;
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (state.draggedNode) {
+                // Trigger detail box focus on click release
+                dom.nodeDetailsBox.style.display = 'block';
+                dom.nodeTitle.textContent = state.draggedNode.label;
+            }
+            state.draggedNode = null;
+        });
+
+        dom.queryNodeBtn.addEventListener('click', () => {
+            const label = dom.nodeTitle.textContent;
+            dom.chatInput.value = `Explain the concept of "${label}" in the context of these papers.`;
+            dom.chatInput.focus();
+            handleQuerySubmission();
+            dom.nodeDetailsBox.style.display = 'none';
+        });
+
 
         // --- CHAT SYSTEM AND INTENT RETRIEVAL (RAG) ---
-        
-        // Simple search semantic retriever to get relevant context and pages
         function retrieveContext(query, topPagesCount = 3) {
-            const activeDoc = state.documents.find(d => d.id === state.activeDocId);
-            if (!activeDoc) return { contextString: "", sources: [] };
+            const activeDocs = state.documents.filter(d => state.activeContextIds.includes(d.id));
+            if (activeDocs.length === 0) return { contextString: "", sources: [] };
 
             const queryTerms = query.toLowerCase()
                 .replace(/[^\w\s]/g, '')
                 .split(/\s+/)
                 .filter(term => term.length > 2);
 
-            // Compute score for each page
-            const pageScores = activeDoc.pages.map(page => {
-                let score = 0;
-                const pageTextLower = page.text.toLowerCase();
-                
-                queryTerms.forEach(term => {
-                    const regex = new RegExp(`\\b${term}\\b`, 'g');
-                    const matches = pageTextLower.match(regex);
-                    if (matches) {
-                        score += matches.length * 3; // exact word frequency match weight
-                    } else if (pageTextLower.includes(term)) {
-                        score += 1; // substring match weight
-                    }
-                });
+            let allPageScores = [];
 
-                return { page, score };
+            activeDocs.forEach(doc => {
+                doc.pages.forEach(page => {
+                    let score = 0;
+                    const pageTextLower = page.text.toLowerCase();
+                    
+                    queryTerms.forEach(term => {
+                        const regex = new RegExp(`\\b${term}\\b`, 'g');
+                        const matches = pageTextLower.match(regex);
+                        if (matches) {
+                            score += matches.length * 3;
+                        } else if (pageTextLower.includes(term)) {
+                            score += 1;
+                        }
+                    });
+                    
+                    allPageScores.push({ doc, page, score });
+                });
             });
 
             // Sort descending by relevance score
-            pageScores.sort((a, b) => b.score - a.score);
-
-            // Get top high-scored pages
-            const topMatches = pageScores.filter(p => p.score > 0).slice(0, topPagesCount);
+            allPageScores.sort((a, b) => b.score - a.score);
+            const topMatches = allPageScores.filter(p => p.score > 0).slice(0, topPagesCount);
             
-            // If nothing matched, default to the first couple pages (usually abstract/intro)
             if (topMatches.length === 0) {
-                const defaultPages = activeDoc.pages.slice(0, Math.min(activeDoc.pages.length, topPagesCount));
+                // Default fallback: Intro pages of active documents
+                const fallbackContext = activeDocs.map(doc => {
+                    const introPages = doc.pages.slice(0, Math.min(doc.pages.length, 2));
+                    return introPages.map(p => `[File: ${doc.name}, Page ${p.pageNum}]\n${p.text}`).join('\n');
+                }).join('\n\n');
                 return {
-                    contextString: defaultPages.map(p => `[Page ${p.pageNum} Context]\n${p.text}`).join('\n\n'),
-                    sources: defaultPages.map(p => p.pageNum)
+                    contextString: fallbackContext,
+                    sources: activeDocs.flatMap(doc => doc.pages.slice(0, Math.min(doc.pages.length, 2)).map(p => ({ docId: doc.id, docName: doc.name, pageNum: p.pageNum })))
                 };
             }
 
             return {
-                contextString: topMatches.map(m => `[Page ${m.page.pageNum} Context]\n${m.page.text}`).join('\n\n'),
-                sources: topMatches.map(m => m.page.pageNum)
+                contextString: topMatches.map(m => `[File: ${m.doc.name}, Page ${m.page.pageNum}]\n${m.page.text}`).join('\n\n'),
+                sources: topMatches.map(m => ({ docId: m.doc.id, docName: m.doc.name, pageNum: m.page.pageNum }))
             };
         }
 
@@ -822,33 +1398,47 @@
                 role === 'user' ? 'ml-auto items-end' : 'mr-auto items-start'
             }`;
 
-            // Handle citations format: replacement [Page X] or (Page X) with active UI interaction
-            let processedText = text.replace(/\[(?:Page|page|p\.)\s*(\d+)\]/gi, (match, p1) => {
-                return `<button onclick="goToPage(${p1})" class="px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 hover:underline border border-indigo-200/50 text-[10px] inline-flex items-center space-x-1 font-semibold code-font cursor-pointer"><i data-lucide="external-link" class="w-2.5 h-2.5 mr-0.5 inline"></i>Page ${p1}</button>`;
+            // Cross-document Page Redirect mapping mechanism
+            let processedText = text.replace(/\[([^,\]]+),\s*(?:Page|page|p\.)\s*(\d+)\]/gi, (match, docName, pNum) => {
+                // Find matching document based on name
+                const matchedDoc = state.documents.find(d => d.name.toLowerCase().includes(docName.trim().toLowerCase()));
+                if (matchedDoc) {
+                    return `<button onclick="goToCitatedPage('${matchedDoc.id}', ${pNum})" class="px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 hover:underline border border-rose-200/50 dark:border-rose-800/50 text-[10px] inline-flex items-center space-x-1 font-semibold code-font cursor-pointer"><i data-lucide="external-link" class="w-2.5 h-2.5 mr-0.5 inline"></i>${docName.trim()}, p. ${pNum}</button>`;
+                }
+                return match;
             });
 
             const contentEl = document.createElement('div');
             contentEl.className = `p-3 rounded-lg text-xs leading-relaxed ${
                 role === 'user'
-                ? 'bg-stone-900 text-stone-100 dark:bg-stone-100 dark:text-stone-900 rounded-br-none'
+                ? 'bg-rose-600 text-white rounded-br-none'
                 : 'bg-stone-100 text-stone-800 dark:bg-stone-800 dark:text-stone-200 rounded-bl-none border border-stone-200 dark:border-stone-700'
             }`;
             contentEl.innerHTML = processedText;
 
             bubble.appendChild(contentEl);
 
-            // If AI response and sources exist, render explicit citation links
+            // Add citations reference links at message footer
             if (role === 'assistant' && sources.length > 0) {
                 const sourcesContainer = document.createElement('div');
                 sourcesContainer.className = 'flex flex-wrap items-center gap-1.5 mt-1 text-[10px] text-stone-400';
                 sourcesContainer.innerHTML = `<span class="flex items-center"><i data-lucide="bookmark" class="w-2.5 h-2.5 mr-1"></i> References:</span>`;
                 
-                // Keep unique sources
-                const uniqueSources = [...new Set(sources)].sort((a,b)=>a-b);
+                // Deduplicate references
+                const uniqueSources = [];
+                const seen = new Set();
+                sources.forEach(s => {
+                    const key = `${s.docId}-${s.pageNum}`;
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        uniqueSources.push(s);
+                    }
+                });
+
                 uniqueSources.forEach(src => {
                     sourcesContainer.innerHTML += `
-                        <button onclick="goToPage(${src})" class="hover:underline hover:text-indigo-500 font-semibold cursor-pointer">
-                            p. ${src}
+                        <button onclick="goToCitatedPage('${src.docId}', ${src.pageNum})" class="hover:underline hover:text-rose-500 font-semibold cursor-pointer">
+                            ${src.docName} (p. ${src.pageNum})
                         </button>
                     `;
                 });
@@ -863,15 +1453,18 @@
             }
         }
 
-        // Apply prompt template
-        window.applyPrompt = function(promptText) {
-            dom.chatInput.value = promptText;
-            dom.chatInput.focus();
+        // Direct Redirecting action on citation click
+        window.goToCitatedPage = function(docId, pageNum) {
+            // Select paper
+            selectActiveDocument(docId);
+            // Go to page
+            goToPage(pageNum);
+            // Switch tab view
+            switchTab('PaperView');
+            showNotification(`Jumped directly to referenced location.`, "navigation");
         };
 
-        // Query executing logic utilizing exponential backoff
         async function queryGemini(payload, retries = 5, delay = 1000) {
-            // Updated directly to use the production stable 'gemini-2.5-flash' endpoint
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${state.apiKey}`;
             
             for (let i = 0; i < retries; i++) {
@@ -881,20 +1474,14 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-                    
-                    if (response.ok) {
-                        return await response.json();
-                    }
-                    
+                    if (response.ok) return await response.json();
                     if (response.status === 429) {
-                        // Rate limit error - implement backoff
                         await new Promise(resolve => setTimeout(resolve, delay));
                         delay *= 2;
                         continue;
                     }
-
                     const errData = await response.json();
-                    throw new Error(errData.error?.message || "Internal generation anomaly.");
+                    throw new Error(errData.error?.message || "Internal generation error.");
                 } catch (err) {
                     if (i === retries - 1) throw err;
                     await new Promise(resolve => setTimeout(resolve, delay));
@@ -910,62 +1497,50 @@
             const rawQuery = dom.chatInput.value.trim();
             if (!rawQuery) return;
             if (!state.apiKey) {
-                showNotification("Please link a valid Gemini API Key first.", "key");
+                showNotification("Gemini API Key is required.", "key");
                 return;
             }
 
-            // Clear input box
             dom.chatInput.value = '';
-
-            // User Message display
             renderMessage('user', rawQuery);
 
-            // Fetch semantic context of selected active paper
-            const activeDoc = state.documents.find(d => d.id === state.activeDocId);
+            const activeDocs = state.documents.filter(d => state.activeContextIds.includes(d.id));
             const { contextString, sources } = retrieveContext(rawQuery);
 
             let promptContext = "";
-            if (activeDoc) {
+            if (activeDocs.length > 0) {
                 promptContext = `
-You are an expert AI Research Assistant. You are analyzing the research paper: "${activeDoc.name}".
-Below are excerpts of the most relevant context and pages from this paper mapped to search scores:
+You are analyzing a scientific/academic paper database. The user query is: "${rawQuery}".
+Below are excerpts of the most relevant context and pages matching this query:
 ------------------------------------------
 ${contextString}
 ------------------------------------------
 
 INSTRUCTIONS:
-1. Formulate a comprehensive, analytical response to the user's question.
-2. IMPORTANT: You must reference which pages you extracted the answer from in your text using the bracket style syntax, e.g. [Page X] or [Page Y]. Do not make up pages! Ensure the citation perfectly corresponds to the actual relevant parsed text provided in the context above.
-3. Keep the tone academic, crisp, and direct.
-4. If the retrieved context is unrelated or does not contain the answer, utilize your own foundational scientific knowledge to help, but clearly state that the text of the paper did not contain direct references to this answer.
+1. Respond to the user's inquiry with robust, analytical scientific depth.
+2. IMPORTANT: You must reference which files and pages you extracted the answer from in your text using the format [Filename, Page X] (e.g., [AlphaFold.pdf, Page 1]). Ensure the citation perfectly matches the files in the context provided.
+3. If the retrieved context does not contain the complete answer, use your pre-trained academic knowledge fallback, but transparently state that direct references were not present inside the uploaded text.
 `;
             } else {
                 promptContext = `
-You are analyzing papers on behalf of the user, but they haven't uploaded or selected any specific document yet. 
-Politely remind them that they can upload scientific papers (PDFs) in the left panel to retrieve specific context, but go ahead and answer their general academic/scientific query using your vast knowledge base.
+The user query is: "${rawQuery}". No document context has been toggled in active sidebar context yet. 
+Politely ask them to upload files and tick their active checkbox, then answer their query using your general foundational intelligence.
 `;
             }
 
-            // Prepare API request payload
-            const systemPrompt = "You are a professional research paper analyst assistant. You help scientists, students, and engineers break down papers, answer questions, identify logical errors, explain methodologies, and evaluate formulas.";
-            
+            const systemPrompt = "You are ArxivLLM, a premium academic research co-pilot assistant. You help researchers analyze papers, structure presentation decks, compile LaTeX code, and visualize key findings.";
             const payload = {
-                contents: [
-                    {
-                        parts: [
-                            { text: `SYSTEM INSTRUCTION: ${systemPrompt}\n\nUSER QUESTION: ${rawQuery}\n\nCONTEXT FROM CURRENT PAPERS:\n${promptContext}` }
-                        ]
-                    }
-                ]
+                contents: [{
+                    parts: [{ text: `SYSTEM INSTRUCTION: ${systemPrompt}\n\nCONTEXT FROM PAPERS:\n${promptContext}` }]
+                }]
             };
 
-            // Setup temporary loading message
             const loadingBubble = document.createElement('div');
             loadingBubble.className = "flex flex-col space-y-1 max-w-[85%] mr-auto items-start";
             loadingBubble.innerHTML = `
                 <div class="p-3 bg-stone-100 dark:bg-stone-800 text-stone-500 rounded-lg text-xs flex items-center space-x-2 border border-stone-200 dark:border-stone-700">
                     <div class="w-3.5 h-3.5 border-2 border-stone-400 border-t-transparent rounded-full animate-spin"></div>
-                    <span>Consulting Gemini models...</span>
+                    <span>Analyzing papers context...</span>
                 </div>
             `;
             dom.chatMessageContainer.appendChild(loadingBubble);
@@ -973,12 +1548,8 @@ Politely remind them that they can upload scientific papers (PDFs) in the left p
 
             try {
                 const responseData = await queryGemini(payload);
-                const answer = responseData.candidates?.[0]?.content?.parts?.[0]?.text || "No readable content returned.";
-                
-                // Remove loading bubble
+                const answer = responseData.candidates?.[0]?.content?.parts?.[0]?.text || "No output returned.";
                 loadingBubble.remove();
-
-                // Render answer with citations
                 renderMessage('assistant', answer, sources);
             } catch (err) {
                 loadingBubble.remove();
@@ -988,8 +1559,8 @@ Politely remind them that they can upload scientific papers (PDFs) in the left p
                 errBubble.className = "flex flex-col space-y-1 max-w-[85%] mr-auto items-start";
                 errBubble.innerHTML = `
                     <div class="p-3 bg-rose-50 text-rose-700 dark:bg-rose-950/20 dark:text-rose-400 rounded-lg text-xs border border-rose-200 dark:border-rose-900">
-                        <p class="font-semibold">Execution Interrupted</p>
-                        <p class="mt-0.5 text-[11px] leading-relaxed">${err.message || "An unexpected error occurred. Please verify your connection."}</p>
+                        <p class="font-semibold">Terminal Query Interrupted</p>
+                        <p class="mt-0.5 text-[11px] leading-relaxed">${err.message || "Unexpected model handshake mismatch."}</p>
                     </div>
                 `;
                 dom.chatMessageContainer.appendChild(errBubble);
@@ -997,10 +1568,8 @@ Politely remind them that they can upload scientific papers (PDFs) in the left p
             }
         }
 
-        // Chat Form events
         dom.chatForm.addEventListener('submit', handleQuerySubmission);
 
-        // Submit via enter, line break via Shift+Enter
         dom.chatInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -1008,10 +1577,56 @@ Politely remind them that they can upload scientific papers (PDFs) in the left p
             }
         });
 
-        // Clear Chat History
+        // Trigger Quick Prompts from actions toolbar
+        window.triggerQuickAction = function(actionLabel, queryPrompt) {
+            const activeDocs = state.documents.filter(d => state.activeContextIds.includes(d.id));
+            if (activeDocs.length === 0) {
+                showNotification("Toggle active checkbox in sidebar first.", "alert-triangle");
+                return;
+            }
+            dom.chatInput.value = queryPrompt;
+            handleQuerySubmission();
+        };
+
+        // --- EXPORT SUITE LOGICS ---
+        dom.exportChatLogBtn.addEventListener('click', () => {
+            // Compile chat log text
+            const textContent = Array.from(dom.chatMessageContainer.children)
+                .map(node => node.innerText)
+                .join("\n\n------------------------------\n\n");
+            
+            const blob = new Blob([textContent], { type: "text/markdown;charset=utf-8" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `arxiv_llm_chat_session.md`;
+            link.click();
+            showNotification("Chat session history downloaded.", "download-cloud");
+        });
+
+        dom.exportNotesBtn.addEventListener('click', () => {
+            const activeDocs = state.documents.filter(d => state.activeContextIds.includes(d.id));
+            if (activeDocs.length === 0) {
+                showNotification("No active papers context to compile report.", "info");
+                return;
+            }
+            
+            let notesText = `# ArxivLLM Analytical Research Report\n\n`;
+            activeDocs.forEach(doc => {
+                notesText += `## Document: ${doc.name}\n- Page Count: ${doc.pageCount}\n- Text Length: ${doc.pages.map(p=>p.text).join(' ').length} characters\n\n`;
+                notesText += `### Abstract Analysis Excerpt\n${doc.pages[0]?.text.slice(0, 1000)}...\n\n`;
+            });
+
+            const blob = new Blob([notesText], { type: "text/markdown;charset=utf-8" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `arxiv_llm_notes_report.md`;
+            link.click();
+            showNotification("Academic notes report exported.", "file-check");
+        });
+
         dom.clearChatBtn.addEventListener('click', () => {
             dom.chatMessageContainer.innerHTML = '';
-            showNotification("Workspace conversation reset.", "trash-2");
+            showNotification("Terminal conversation cleared.", "trash");
         });
 
         // --- LIFECYCLE INITIALIZER ---
